@@ -1,0 +1,224 @@
+/* ------------------------------------- */
+/* ESTILOS BASE E RESET                  */
+/* ------------------------------------- */
+
+body {
+    font-family: 'Segoe UI', Arial, sans-serif;
+    padding: 20px;
+    background: #f8f9fa;
+    color: #333;
+    line-height: 1.6;
+}
+
+/* Cabeçalho do Logo */
+#areacabecalho {
+    margin-bottom: 25px;
+    border-bottom: 2px solid #007bff;
+    padding-bottom: 10px;
+}
+
+#arealogo h1 {
+    margin: 0;
+    font-size: 28px;
+    color: #007bff;
+    font-weight: 800;
+}
+
+#arealogo h1 a {
+    text-decoration: none;
+    color: inherit;
+}
+
+#arealogo .cinza {
+    color: #6c757d;
+    font-weight: 300;
+}
+
+/* ------------------------------------- */
+/* CONTROLES (PESQUISA E BOTÕES)         */
+/* ------------------------------------- */
+
+#searchInput {
+    padding: 12px;
+    font-size: 16px;
+    border: 1px solid #bfc6d1;
+    border-radius: 6px;
+    width: 100%;
+    box-sizing: border-box;
+    margin-bottom: 15px;
+    box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+#searchInput:focus {
+    outline: none;
+    border-color: #007bff;
+    box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.25);
+}
+
+.button-group {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+}
+
+button {
+    padding: 10px 18px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-weight: bold;
+    font-size: 14px;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+#addButton {
+    background-color: #28a745;
+    color: white;
+}
+
+#addButton:hover {
+    background-color: #218838;
+    transform: translateY(-1px);
+}
+
+#refreshButton {
+    background-color: #007bff;
+    color: white;
+}
+
+#refreshButton:hover {
+    background-color: #0069d9;
+}
+
+#exportButton {
+    background-color: #6c757d;
+    color: white;
+    flex-grow: 1;
+}
+
+#exportButton:hover {
+    background-color: #5a6268;
+}
+
+#updateContainer {
+    margin-bottom: 15px;
+    font-size: 13px;
+    color: #666;
+    font-style: italic;
+}
+
+/* ------------------------------------- */
+/* TABELA DE DADOS                       */
+/* ------------------------------------- */
+
+.table-container {
+    overflow-x: auto;
+    /* Garante que a tabela não quebre em telas pequenas */
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+#planilha {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 1000px;
+    /* Evita que as colunas fiquem muito apertadas */
+}
+
+#planilha th {
+    background-color: #007bff;
+    color: black;
+    font-weight: 600;
+    text-align: center;
+    padding: 14px 10px;
+    text-transform: uppercase;
+    font-size: 13px;
+    letter-spacing: 0.5px;
+    position: sticky;
+    top: 0;
+}
+
+#planilha td {
+    padding: 10px;
+    border-bottom: 1px solid #eee;
+    text-align: center;
+    font-size: 14px;
+    color: #444;
+}
+
+tr:nth-child(even) {
+    background-color: #fcfcfc;
+}
+
+tr:hover {
+    background-color: #f1f7ff;
+}
+
+/* ------------------------------------- */
+/* MODO DE EDIÇÃO (INPUTS DENTRO DA TD)  */
+/* ------------------------------------- */
+
+/* Quando clicamos em editar, os inputs devem preencher a célula */
+tr.editing td input,
+tr.editing td select {
+    width: 100%;
+    padding: 6px;
+    border: 1px solid #ffc107;
+    border-radius: 4px;
+    font-size: 13px;
+    box-sizing: border-box;
+    /* Importante para não vazar da célula */
+    background-color: #fff;
+}
+
+tr.editing {
+    background-color: #fffdf5 !important;
+}
+
+/* Botões de Ação na Tabela */
+.btn-edit {
+    background-color: #ffc107;
+    color: #000;
+    margin-right: 4px;
+}
+
+.btn-edit:hover {
+    background-color: #e0a800;
+}
+
+.btn-delete {
+    background-color: #dc3545;
+    color: white;
+}
+
+.btn-delete:hover {
+    background-color: #c82333;
+}
+
+.btn-save {
+    background-color: #28a745 !important;
+    color: white !important;
+}
+
+.btn-save:hover {
+    background-color: #218838 !important;
+}
+
+/* ------------------------------------- */
+/* UTILITÁRIOS                           */
+/* ------------------------------------- */
+
+.cinza-texto {
+    color: #888;
+}
+
+u {
+    color: crimson;
+    text-decoration: none;
+    font-weight: bold;
+}

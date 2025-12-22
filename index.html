@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="pt">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ALARME INFRA/AC - Gerenciamento</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+    <div id="areacabecalho">
+        <div id="arealogo">
+            <h1><a href="#" style="color:blue; text-decoration:none;">FALHA</a><span class="cinza"> DE INFRA</span></h1>
+        </div>
+    </div>
+
+    <input type="text" id="searchInput" placeholder="Pesquisar por UF ou Site (Ex: RJ, ARR)..."
+        style="width: 100%; padding: 10px; margin-bottom: 20px;">
+
+    <div class="button-group">
+        <button id="addButton">➕ ADICIONAR NOVO REGISTRO</button>
+        <button id="refreshButton">🔄 ATUALIZAR LISTA</button>
+        <button id="exportButton">⬇️ EXPORTAR PARA EXCEL</button>
+    </div>
+
+    <div id="updateContainer" style="margin-bottom: 10px;">
+        <span id="lastUpdateDisplay" style="font-size: 12px; color: #666;"></span>
+    </div>
+
+    <datalist id="listaMunicipios">
+        <option value="AFONSO CLAUDIO">
+        <option value="AFONSO CLÁUDIO - CENTRO">
+        <option value="ALEGRE - CENTRO">
+        <option value="ANCHIETA">
+        <option value="ANCHIETA - CENTRO">
+        <option value="ANCHIETA - FAZENDA SUBAIA">
+        <option value="ANCHIETA - UBU">
+        <option value="ANEL_COMUT_MOVEL/NE_ISOLADO_MOVEL">
+        <option value="ANGRA DOS REIS">
+        <option value="ARACRUZ">
+        <option value="ARACRUZ - BARRA DO SAHY PRAÇA">
+        <option value="ARACRUZ - COQUEIRAL DE ARACRUZ">
+        <option value="ARACRUZ - RIBEIRAO DO MEIO">
+        <option value="ARACRUZ - VILA NOVA">
+        <option value="ARACRUZ VILAGIO">
+        <option value="ARARUAMA">
+        <option value="ARMACAO DOS BUZIOS">
+        <option value="ARMACAO DOS BUZIOS - CARAVELAS">
+        <option value="ARMACAO DOS BUZIOS-GERIBA">
+        <option value="ARMACAO DOS BUZIOS-PRAIA RASA">
+        <option value="ARRAIAL DO CABO">
+        <option value="BAIXO GUANDU">
+        <option value="BAIXO GUANDU - VILA KENNEDY">
+        <option value="BARRA DE SÃO FRANCISCO">
+        <option value="BARRA DE SAO FRANCISCO">
+        <option value="BARRA DO PIRAI">
+        <option value="BARRA MANSA">
+        <option value="BELFORD ROXO">
+        <option value="BELFORD ROXO - JARDIM REDENTOR">
+        <option value="BELFORD ROXO - LOTE XV">
+        <option value="BELFORD ROXO PARQUE SÃO JOSÉ">
+        <option value="BELFORD ROXO VILA JOANA">
+        <option value="BELFORD ROXO-BAYER">
+        <option value="BELFORD ROXO-ROXO PARQUE AMERICANO">
+        <option value="BOM JARDIM">
+        <option value="BOM JESUS DO ITABAPOANA">
+        <option value="BREJETUBA">
+        <option value="CABO FRIO">
+        <option value="CACHOEIRAS DE MACACU">
+        <option value="CACHOEIRO DE ITAPEMIRIM">
+        <option value="CACHOEIRO DE ITAPEMIRIM - SANTA HELENA">
+        <option value="CACHOEIRO DE ITAPEMIRIM - SANTO ANTÔNIO">
+        <option value="CACHOEIRO DE ITAPEMIRIM-PERIM CENTER">
+        <option value="CAMPOS DOS GOYTACAZES">
+        <option value="CANTAGALO">
+        <option value="CARIACICA">
+        <option value="CARIACICA - BELA AURORA">
+        <option value="CARIACICA - RETIRO SAUDOSO">
+        <option value="CASIMIRO DE ABREU">
+        <option value="CASTELO">
+        <option value="CENTRO RIO DAS OSTRAS">
+        <option value="COLATINA">
+        <option value="CONCEICAO DA BARRA">
+        <option value="CORDEIRO">
+        <option value="DOMINGOS MARTINS">
+        <option value="DORES DO RIO PRETO">
+        <option value="DUQUE DE CAXIAS">
+        <option value="FUNDAO">
+        <option value="GUACUI">
+        <option value="GUAPIMIRIM">
+        <option value="GUARAPARI">
+        <option value="IBATIBA">
+        <option value="IBITIRAMA">
+        <option value="ICONHA">
+        <option value="IGUABA CIDADE NOVA">
+        <option value="IGUABA GRANDE">
+        <option value="INHAUMA">
+        <option value="IRAOCARA">
+        <option value="IRUPI">
+        <option value="ITABORAI">
+        <option value="ITAGUAI">
+        <option value="ITAGUAÍ">
+        <option value="ITAPEMIRIM">
+        <option value="ITAPERUNA">
+        <option value="ITATIAIA">
+        <option value="IUNA">
+        <option value="JOAO NEIVA">
+        <option value="LINHARES">
+        <option value="MACAE">
+        <option value="MAGE">
+        <option value="MAGÉ">
+        <option value="MANGARATIBA">
+        <option value="MARATAIZES">
+        <option value="MARATAIZES - PORTO DA BARRA">
+        <option value="MARATAÍZES - BARRA DO ITAPEMIRIM">
+        <option value="MARICA">
+        <option value="MARECHAL FLORIANO">
+        <option value="MENDES">
+        <option value="MESQUITA">
+        <option value="MESQUITA-BANCO DE AREIA">
+        <option value="MIGUEL COUTO BELFORD ROXO">
+        <option value="MIGUEL PEREIRA">
+        <option value="MIMOSO DO SUL">
+        <option value="MIRACEMA">
+        <option value="NILOPOLIS">
+        <option value="NITEROI">
+        <option value="NOVA FRIBURGO">
+        <option value="NOVA IGUACU">
+        <option value="NOVA VENECIA">
+        <option value="PARATY">
+        <option value="PATY DO ALFERES">
+        <option value="PEDRO CANARIO">
+        <option value="PETROPOLIS">
+        <option value="PINHEIRAL">
+        <option value="PINHEIROS">
+        <option value="PIRAI">
+        <option value="PREFEITURA DE RIO DAS OSTRAS">
+        <option value="PRESIDENTE KENNEDY">
+        <option value="QUEIMADOS">
+        <option value="QUEIMADOS - JARDIM ALZIRA">
+        <option value="QUEIMADOS-CHACARA DO SOL">
+        <option value="QUISSAMA">
+        <option value="RESENDE">
+        <option value="RESENDE REAL">
+        <option value="RIO BANANAL">
+        <option value="RIO BONITO">
+        <option value="RIO CLARO">
+        <option value="RIO DAS OSTRAS">
+        <option value="RIO DAS OSTRAS - BEIRA MAR">
+        <option value="RIO DE JANEIRO">
+        <option value="SANTA MARIA DE JETIBA">
+        <option value="SANTA TERESA">
+        <option value="SAO GABRIEL DA PALHA">
+        <option value="SAO GONCALO">
+        <option value="SAO JOAO DA BARRA">
+        <option value="SAO JOAO DE MERITI">
+        <option value="SAO JOSE DO CALCADO">
+        <option value="SAO MATEUS">
+        <option value="SAO PEDRO DA ALDEIA">
+        <option value="SAQUAREMA">
+        <option value="SEROPEDICA">
+        <option value="SEROPÉDICA-RIO GUANDU">
+        <option value="SERRA">
+        <option value="SILVA JARDIM">
+        <option value="SOORETAMA">
+        <option value="TANGUA">
+        <option value="TERESOPOLIS">
+        <option value="TRES RIOS">
+        <option value="VALENCA">
+        <option value="VARRE-SAI">
+        <option value="VASSOURAS">
+        <option value="VENDA NOVA DO IMIGRANTE">
+        <option value="VIANA">
+        <option value="VILA VELHA">
+        <option value="VILA VALERIO">
+        <option value="VITORIA">
+        <option value="VOLTA REDONDA">
+    </datalist>
+
+    <div class="table-container">
+        <table id="planilha">
+            <thead>
+                <tr>
+                    <th>UF</th>
+                    <th>Município</th>
+                    <th>TA Origem</th>
+                    <th>TA Sequência</th>
+                    <th>Status TA</th>
+                    <th>Topology</th>
+                    <th>Site</th>
+                    <th>Grupo</th>
+                    <th>Alarme</th>
+                    <th>Criação</th>
+                    <th>Apresentação</th>
+                    <th style="min-width: 120px;">Ações</th>
+                </tr>
+            </thead>
+            <tbody id="tableBody"></tbody>
+        </table>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getFirestore, collection, addDoc, onSnapshot, doc, deleteDoc, updateDoc, query, orderBy } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyD9_plAOqyH4YgH2iejfBhoCqxvUZEVDYk",
+            authDomain: "falha-de-infra.firebaseapp.com",
+            projectId: "falha-de-infra",
+            storageBucket: "falha-de-infra.firebasestorage.app",
+            messagingSenderId: "685873300766",
+            appId: "1:685873300766:web:3d04c3c934e6c2a416750f"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const colRef = collection(db, "alarmes");
+
+        // --- RENDERIZAÇÃO ---
+        onSnapshot(query(colRef, orderBy("criacaoTimestamp", "desc")), (snapshot) => {
+            const tableBody = document.getElementById("tableBody");
+            tableBody.innerHTML = "";
+            snapshot.forEach((doc) => renderizarLinha(doc.id, doc.data()));
+            document.getElementById('lastUpdateDisplay').textContent = "Sincronizado: " + new Date().toLocaleTimeString();
+        });
+
+        function renderizarLinha(id, data) {
+            const tableBody = document.getElementById("tableBody");
+            const tr = document.createElement("tr");
+            tr.innerHTML = `
+                <td>${data.uf || ''}</td>
+                <td>${data.municipio || ''}</td>
+                <td>${data.taOrigem || ''}</td>
+                <td>${data.taSequencia || ''}</td>
+                <td>${data.statusTa || ''}</td>
+                <td>${data.topology || 'Concentrador'}</td>
+                <td>${data.site || ''}</td>
+                <td>${data.grupo || ''}</td>
+                <td>${data.alarme || 'FALHA DE AC'}</td>
+                <td>${data.criacao ? formatarDataSimples(data.criacao) : ''}</td>
+                <td>${data.apresentacao ? formatarDataSimples(data.apresentacao) : ''}</td>
+                <td>
+                    <button class="btn-edit">✏️ Editar</button>
+                    <button class="btn-delete">🗑️ Excluir</button>
+                </td>
+            `;
+            tr.querySelector(".btn-delete").onclick = () => deletarRegistro(id);
+            tr.querySelector(".btn-edit").onclick = (e) => editarRegistro(e.target, id, data);
+            tableBody.appendChild(tr);
+        }
+
+        function formatarDataSimples(dataISO) {
+            try { const d = new Date(dataISO); return d.toLocaleString('pt-BR').slice(0, 16); } catch (e) { return dataISO; }
+        }
+
+        // --- AÇÕES ---
+        async function adicionarNovo() {
+            const agora = new Date().toISOString().slice(0, 16);
+            await addDoc(colRef, {
+                uf: "RJ", municipio: "", taOrigem: "", taSequencia: "", statusTa: "Ativo",
+                topology: "Concentrador", site: "", grupo: "INFRA_CAMPO_TRIAGEM",
+                alarme: "FALHA DE AC", criacao: agora, apresentacao: agora, criacaoTimestamp: new Date()
+            });
+        }
+
+        async function deletarRegistro(id) {
+            if (confirm("Deseja realmente excluir este registro?")) {
+                await deleteDoc(doc(db, "alarmes", id));
+            }
+        }
+
+        async function editarRegistro(botao, id, dataOriginal) {
+            const tr = botao.closest('tr');
+            const celulas = tr.querySelectorAll('td');
+
+            if (!tr.classList.contains('editing')) {
+                tr.classList.add('editing');
+                botao.textContent = "💾 Salvar";
+                const v = Array.from(celulas).map(c => c.textContent);
+
+                celulas[0].innerHTML = `<select style="width:60px"><option value="RJ" ${v[0] == 'RJ' ? 'selected' : ''}>RJ</option><option value="ES" ${v[0] == 'ES' ? 'selected' : ''}>ES</option></select>`;
+                celulas[1].innerHTML = `<input type="text" list="listaMunicipios" value="${v[1]}" style="width:100%">`;
+                celulas[2].innerHTML = `<input type="text" value="${v[2]}" style="width:100%">`;
+                celulas[3].innerHTML = `<input type="text" value="${v[3]}" style="width:100%">`;
+
+                celulas[4].innerHTML = `
+                    <select>
+                        <option value="Ativo" ${v[4] == 'Ativo' ? 'selected' : ''}>Ativo</option>
+                        <option value="Pré Baixa" ${v[4] == 'Pré Baixa' ? 'selected' : ''}>Pré Baixa</option>
+                        <option value="Fechado" ${v[4] == 'Fechado' ? 'selected' : ''}>Fechado</option>
+                    </select>`;
+
+                celulas[5].innerHTML = `<input type="text" value="Concentrador" readonly style="width:100%">`;
+                celulas[6].innerHTML = `<input type="text" value="${v[6]}" oninput="this.value=this.value.toUpperCase()" style="width:100%">`;
+
+                celulas[7].innerHTML = `
+                    <select style="width:100%">
+                        <option value="INFRA_CAMPO_TRIAGEM" ${v[7] == 'INFRA_CAMPO_TRIAGEM' ? 'selected' : ''}>INFRA_CAMPO_TRIAGEM</option>
+                        <option value="Retenção NOC_Infraestrutura" ${v[7] == 'Retenção NOC_Infraestrutura' ? 'selected' : ''}>Retenção NOC_Infraestrutura</option>
+                        <option value="NOC MG Rede de acesso" ${v[7] == 'NOC MG Rede de acesso' ? 'selected' : ''}>NOC MG Rede de acesso</option>
+                        <option value="TEL_O&M-RJ/ES(Terceiro)" ${v[7] == 'TEL_O&M-RJ/ES(Terceiro)' ? 'selected' : ''}>TEL_O&M-RJ/ES(Terceiro)</option>
+                        <option value="O&M_Acesso_Móvel_Nacional (Terceiro)" ${v[7] == 'O&M_Acesso_Móvel_Nacional (Terceiro)' ? 'selected' : ''}>O&M_Acesso_Móvel_Nacional (Terceiro)</option>
+                    </select>`;
+
+                celulas[8].innerHTML = `<input type="text" value="${v[8]}" style="width:100%">`;
+                celulas[9].innerHTML = `<input type="datetime-local" value="${dataOriginal.criacao || ''}">`;
+                celulas[10].innerHTML = `<input type="datetime-local" value="${dataOriginal.apresentacao || ''}">`;
+            } else {
+                const i = tr.querySelectorAll('input, select');
+                await updateDoc(doc(db, "alarmes", id), {
+                    uf: i[0].value, municipio: i[1].value, taOrigem: i[2].value, taSequencia: i[3].value,
+                    statusTa: i[4].value, site: i[6].value.toUpperCase(), grupo: i[7].value,
+                    alarme: i[8].value, criacao: i[9].value, apresentacao: i[10].value
+                });
+                tr.classList.remove('editing');
+                botao.textContent = "✏️ Editar";
+            }
+        }
+
+        // --- UTILITÁRIOS E EXPORTAÇÃO ---
+        document.getElementById("addButton").onclick = adicionarNovo;
+        document.getElementById("refreshButton").onclick = () => location.reload();
+
+        document.getElementById("searchInput").onkeyup = function () {
+            const filtro = this.value.toLowerCase();
+            document.querySelectorAll("#tableBody tr").forEach(linha => {
+                linha.style.display = linha.textContent.toLowerCase().includes(filtro) ? "" : "none";
+            });
+        };
+
+        document.getElementById("exportButton").onclick = function () {
+            const wb = XLSX.utils.table_to_book(document.getElementById('planilha'), { sheet: "Alarmes" });
+            XLSX.writeFile(wb, "Relatorio_Alarme_Infra.xlsx");
+        };
+    </script>
+</body>
+
+</html>

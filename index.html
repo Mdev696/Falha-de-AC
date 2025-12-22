@@ -204,7 +204,18 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getFirestore, collection, addDoc, onSnapshot, doc, deleteDoc, updateDoc, query, orderBy } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import {
+            getFirestore,
+            collection,
+            addDoc,
+            onSnapshot,
+            doc,
+            deleteDoc,
+            updateDoc,
+            query,
+            orderBy,
+            enableIndexedDbPersistence
+        } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyD9_plAOqyH4YgH2iejfBhoCqxvUZEVDYk",
@@ -215,59 +226,82 @@
             appId: "1:685873300766:web:3d04c3c934e6c2a416750f"
         };
 
+        // Inicializar Firebase
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
         const colRef = collection(db, "alarmes");
 
-        // --- RENDERIZAÇÃO ---
+        // --- ATIVAR PERSISTÊNCIA LOCAL (OFFLINE) ---
+        enableIndexedDbPersistence(db).catch((err) => {
+            if (err.code == 'failed-precondition') {
+                console.warn("Persistência falhou: Múltiplas abas abertas.");
+            } else if (err.code == 'unimplemented') {
+                console.warn("O navegador não suporta persistência local.");
+            }
+        });
+
+        // --- RENDERIZAÇÃO EM TEMPO REAL ---
+        // Todos os usuários conectados verão as atualizações instantaneamente
         onSnapshot(query(colRef, orderBy("criacaoTimestamp", "desc")), (snapshot) => {
             const tableBody = document.getElementById("tableBody");
             tableBody.innerHTML = "";
             snapshot.forEach((doc) => renderizarLinha(doc.id, doc.data()));
-            document.getElementById('lastUpdateDisplay').textContent = "Sincronizado: " + new Date().toLocaleTimeString();
+            document.getElementById('lastUpdateDisplay').textContent = "Sincronizado com Nuvem: " + new Date().toLocaleTimeString();
         });
 
         function renderizarLinha(id, data) {
             const tableBody = document.getElementById("tableBody");
             const tr = document.createElement("tr");
+            tr.dataset.id = id; // Armazena o ID no elemento para facilitar busca
+
             tr.innerHTML = `
-                <td>${data.uf || ''}</td>
-                <td>${data.municipio || ''}</td>
-                <td>${data.taOrigem || ''}</td>
-                <td>${data.taSequencia || ''}</td>
-                <td>${data.statusTa || ''}</td>
-                <td>${data.topology || 'Concentrador'}</td>
-                <td>${data.site || ''}</td>
-                <td>${data.grupo || ''}</td>
-                <td>${data.alarme || 'FALHA DE AC'}</td>
-                <td>${data.criacao ? formatarDataSimples(data.criacao) : ''}</td>
-                <td>${data.apresentacao ? formatarDataSimples(data.apresentacao) : ''}</td>
-                <td>
-                    <button class="btn-edit">✏️ Editar</button>
-                    <button class="btn-delete">🗑️ Excluir</button>
-                </td>
-            `;
+            <td>${data.uf || ''}</td>
+            <td>${data.municipio || ''}</td>
+            <td>${data.taOrigem || ''}</td>
+            <td>${data.taSequencia || ''}</td>
+            <td>${data.statusTa || ''}</td>
+            <td>${data.topology || 'Concentrador'}</td>
+            <td>${data.site || ''}</td>
+            <td>${data.grupo || ''}</td>
+            <td>${data.alarme || 'FALHA DE AC'}</td>
+            <td>${data.criacao ? formatarDataSimples(data.criacao) : ''}</td>
+            <td>${data.apresentacao ? formatarDataSimples(data.apresentacao) : ''}</td>
+            <td>
+                <button class="btn-edit">✏️ Editar</button>
+                <button class="btn-delete">🗑️ Excluir</button>
+            </td>
+        `;
+
             tr.querySelector(".btn-delete").onclick = () => deletarRegistro(id);
             tr.querySelector(".btn-edit").onclick = (e) => editarRegistro(e.target, id, data);
             tableBody.appendChild(tr);
         }
 
         function formatarDataSimples(dataISO) {
-            try { const d = new Date(dataISO); return d.toLocaleString('pt-BR').slice(0, 16); } catch (e) { return dataISO; }
+            if (!dataISO) return "";
+            try {
+                const d = new Date(dataISO);
+                return d.toLocaleString('pt-BR').slice(0, 16);
+            } catch (e) { return dataISO; }
         }
 
         // --- AÇÕES ---
         async function adicionarNovo() {
             const agora = new Date().toISOString().slice(0, 16);
-            await addDoc(colRef, {
-                uf: "RJ", municipio: "", taOrigem: "", taSequencia: "", statusTa: "Ativo",
-                topology: "Concentrador", site: "", grupo: "INFRA_CAMPO_TRIAGEM",
-                alarme: "FALHA DE AC", criacao: agora, apresentacao: agora, criacaoTimestamp: new Date()
-            });
+            try {
+                await addDoc(colRef, {
+                    uf: "RJ", municipio: "", taOrigem: "", taSequencia: "", statusTa: "Ativo",
+                    topology: "Concentrador", site: "", grupo: "INFRA_CAMPO_TRIAGEM",
+                    alarme: "FALHA DE AC", criacao: agora, apresentacao: agora,
+                    criacaoTimestamp: new Date() // Importante para a ordenação
+                });
+            } catch (e) {
+                alert("Erro ao salvar: " + e.message);
+            }
         }
 
         async function deletarRegistro(id) {
-            if (confirm("Deseja realmente excluir este registro?")) {
+            if (confirm("Deseja realmente excluir este registro? Todos os usuários deixarão de vê-lo.")) {
                 await deleteDoc(doc(db, "alarmes", id));
             }
         }
@@ -285,42 +319,49 @@
                 celulas[1].innerHTML = `<input type="text" list="listaMunicipios" value="${v[1]}" style="width:100%">`;
                 celulas[2].innerHTML = `<input type="text" value="${v[2]}" style="width:100%">`;
                 celulas[3].innerHTML = `<input type="text" value="${v[3]}" style="width:100%">`;
-
                 celulas[4].innerHTML = `
-                    <select>
-                        <option value="Ativo" ${v[4] == 'Ativo' ? 'selected' : ''}>Ativo</option>
-                        <option value="Pré Baixa" ${v[4] == 'Pré Baixa' ? 'selected' : ''}>Pré Baixa</option>
-                        <option value="Fechado" ${v[4] == 'Fechado' ? 'selected' : ''}>Fechado</option>
-                    </select>`;
-
+                <select>
+                    <option value="Ativo" ${v[4] == 'Ativo' ? 'selected' : ''}>Ativo</option>
+                    <option value="Pré Baixa" ${v[4] == 'Pré Baixa' ? 'selected' : ''}>Pré Baixa</option>
+                    <option value="Fechado" ${v[4] == 'Fechado' ? 'selected' : ''}>Fechado</option>
+                </select>`;
                 celulas[5].innerHTML = `<input type="text" value="Concentrador" readonly style="width:100%">`;
                 celulas[6].innerHTML = `<input type="text" value="${v[6]}" oninput="this.value=this.value.toUpperCase()" style="width:100%">`;
-
                 celulas[7].innerHTML = `
-                    <select style="width:100%">
-                        <option value="INFRA_CAMPO_TRIAGEM" ${v[7] == 'INFRA_CAMPO_TRIAGEM' ? 'selected' : ''}>INFRA_CAMPO_TRIAGEM</option>
-                        <option value="Retenção NOC_Infraestrutura" ${v[7] == 'Retenção NOC_Infraestrutura' ? 'selected' : ''}>Retenção NOC_Infraestrutura</option>
-                        <option value="NOC MG Rede de acesso" ${v[7] == 'NOC MG Rede de acesso' ? 'selected' : ''}>NOC MG Rede de acesso</option>
-                        <option value="TEL_O&M-RJ/ES(Terceiro)" ${v[7] == 'TEL_O&M-RJ/ES(Terceiro)' ? 'selected' : ''}>TEL_O&M-RJ/ES(Terceiro)</option>
-                        <option value="O&M_Acesso_Móvel_Nacional (Terceiro)" ${v[7] == 'O&M_Acesso_Móvel_Nacional (Terceiro)' ? 'selected' : ''}>O&M_Acesso_Móvel_Nacional (Terceiro)</option>
-                    </select>`;
-
+                <select style="width:100%">
+                    <option value="INFRA_CAMPO_TRIAGEM" ${v[7] == 'INFRA_CAMPO_TRIAGEM' ? 'selected' : ''}>INFRA_CAMPO_TRIAGEM</option>
+                    <option value="Retenção NOC_Infraestrutura" ${v[7] == 'Retenção NOC_Infraestrutura' ? 'selected' : ''}>Retenção NOC_Infraestrutura</option>
+                    <option value="NOC MG Rede de acesso" ${v[7] == 'NOC MG Rede de acesso' ? 'selected' : ''}>NOC MG Rede de acesso</option>
+                    <option value="TEL_O&M-RJ/ES(Terceiro)" ${v[7] == 'TEL_O&M-RJ/ES(Terceiro)' ? 'selected' : ''}>TEL_O&M-RJ/ES(Terceiro)</option>
+                    <option value="O&M_Acesso_Móvel_Nacional (Terceiro)" ${v[7] == 'O&M_Acesso_Móvel_Nacional (Terceiro)' ? 'selected' : ''}>O&M_Acesso_Móvel_Nacional (Terceiro)</option>
+                </select>`;
                 celulas[8].innerHTML = `<input type="text" value="${v[8]}" style="width:100%">`;
                 celulas[9].innerHTML = `<input type="datetime-local" value="${dataOriginal.criacao || ''}">`;
                 celulas[10].innerHTML = `<input type="datetime-local" value="${dataOriginal.apresentacao || ''}">`;
             } else {
                 const i = tr.querySelectorAll('input, select');
-                await updateDoc(doc(db, "alarmes", id), {
-                    uf: i[0].value, municipio: i[1].value, taOrigem: i[2].value, taSequencia: i[3].value,
-                    statusTa: i[4].value, site: i[6].value.toUpperCase(), grupo: i[7].value,
-                    alarme: i[8].value, criacao: i[9].value, apresentacao: i[10].value
-                });
-                tr.classList.remove('editing');
-                botao.textContent = "✏️ Editar";
+                try {
+                    await updateDoc(doc(db, "alarmes", id), {
+                        uf: i[0].value,
+                        municipio: i[1].value,
+                        taOrigem: i[2].value,
+                        taSequencia: i[3].value,
+                        statusTa: i[4].value,
+                        site: i[6].value.toUpperCase(),
+                        grupo: i[7].value,
+                        alarme: i[8].value,
+                        criacao: i[9].value,
+                        apresentacao: i[10].value
+                    });
+                    tr.classList.remove('editing');
+                    botao.textContent = "✏️ Editar";
+                } catch (e) {
+                    alert("Erro ao atualizar: " + e.message);
+                }
             }
         }
 
-        // --- UTILITÁRIOS E EXPORTAÇÃO ---
+        // Eventos de botões
         document.getElementById("addButton").onclick = adicionarNovo;
         document.getElementById("refreshButton").onclick = () => location.reload();
 

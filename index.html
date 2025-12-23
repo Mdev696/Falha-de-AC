@@ -62,9 +62,7 @@
     <script>
         // --- CONFIGURAÇÃO SUPABASE ---
         const SUPABASE_URL = 'https://xfxuvhonklytrvcovghr.supabase.co';
-        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhmeHV2aG9ua2x5dHJ2Y292Z2hyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjY0MjM0MDIsImV4cCI6MjA4MTk5OTQwMn0.X-0Y0fqxGWD-L4xorDQk99i3EaGYGiy8yuaoDkBPhY0'; // Mantenha sua chave aqui
-
-        // Correção na inicialização do cliente
+        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhmeHV2aG9ua2x5dHJ2Y292Z2hyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjY0MjM0MDIsImV4cCI6MjA4MTk5OTQwMn0.X-0Y0fqxGWD-L4xorDQk99i3EaGYGiy8yuaoDkBPhY0';
         const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
         // --- CARREGAR DADOS ---
@@ -151,20 +149,32 @@
                 const celulas = tr.querySelectorAll('td');
                 const v = Array.from(celulas).map(c => c.innerText);
 
-                // Transformando células em inputs
+                // Função auxiliar para converter "DD/MM/AAAA HH:MM" para formato input "AAAA-MM-DDTHH:MM"
+                const converterParaInputData = (texto) => {
+                    if (!texto || texto === "") return "";
+                    const parts = texto.split(' ');
+                    if (parts.length < 2) return "";
+                    const [data, hora] = parts;
+                    const [dia, mes, ano] = data.split('/');
+                    return `${ano}-${mes}-${dia}T${hora}`;
+                };
+
                 celulas[0].innerHTML = `<select><option value="RJ" ${v[0] == 'RJ' ? 'selected' : ''}>RJ</option><option value="ES" ${v[0] == 'ES' ? 'selected' : ''}>ES</option></select>`;
                 celulas[1].innerHTML = `<input type="text" list="listaMunicipios" value="${v[1]}">`;
                 celulas[2].innerHTML = `<input type="text" value="${v[2]}">`;
                 celulas[3].innerHTML = `<input type="text" value="${v[3]}">`;
                 celulas[4].innerHTML = `<select><option value="Ativo" ${v[4] == 'Ativo' ? 'selected' : ''}>Ativo</option><option value="Pré Baixa" ${v[4] == 'Pré Baixa' ? 'selected' : ''}>Pré Baixa</option><option value="Fechado" ${v[4] == 'Fechado' ? 'selected' : ''}>Fechado</option></select>`;
-                // Topology (Célula 5) - mantendo apenas texto ou editável? Vou deixar editável:
                 celulas[5].innerHTML = `<input type="text" value="${v[5]}">`;
                 celulas[6].innerHTML = `<input type="text" value="${v[6]}" oninput="this.value=this.value.toUpperCase()">`;
                 celulas[8].innerHTML = `<input type="text" value="${v[8]}">`;
+
+                // Inputs de Data
+                celulas[9].innerHTML = `<input type="datetime-local" value="${converterParaInputData(v[9])}">`;
+                celulas[10].innerHTML = `<input type="datetime-local" value="${converterParaInputData(v[10])}">`;
+
             } else {
                 const inputs = tr.querySelectorAll('input, select');
 
-                // Mapeamento correto dos inputs para as colunas do banco
                 const dadosAtualizados = {
                     uf: inputs[0].value,
                     municipio: inputs[1].value,
@@ -173,7 +183,9 @@
                     statusTa: inputs[4].value,
                     topology: inputs[5].value,
                     site: inputs[6].value.toUpperCase(),
-                    alarme: inputs[7].value
+                    alarme: inputs[7].value,
+                    criacao: inputs[8].value ? new Date(inputs[8].value).toISOString() : null,
+                    apresentacao: inputs[9].value ? new Date(inputs[9].value).toISOString() : null
                 };
 
                 const { error } = await supabaseClient.from('alarmes').update(dadosAtualizados).eq('id', id);

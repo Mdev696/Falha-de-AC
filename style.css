@@ -1,78 +1,25 @@
-/* ------------------------------------- */
-/* ESTILOS BASE E RESET                  */
-/* ------------------------------------- */
-
 body {
-    font-family: 'Segoe UI', Arial, sans-serif;
+    font-family: sans-serif;
     padding: 20px;
-    background: #f8f9fa;
-    color: #333;
-    line-height: 1.6;
+    background-color: #f4f4f9;
 }
 
-/* Cabeçalho do Logo */
 #areacabecalho {
-    margin-bottom: 25px;
-    border-bottom: 2px solid #007bff;
-    padding-bottom: 10px;
-}
-
-#arealogo h1 {
-    margin: 0;
-    font-size: 28px;
-    color: #007bff;
-    font-weight: 800;
-}
-
-#arealogo h1 a {
-    text-decoration: none;
-    color: inherit;
-}
-
-#arealogo .cinza {
-    color: #6c757d;
-    font-weight: 300;
-}
-
-/* ------------------------------------- */
-/* CONTROLES (PESQUISA E BOTÕES)         */
-/* ------------------------------------- */
-
-#searchInput {
-    padding: 12px;
-    font-size: 16px;
-    border: 1px solid #bfc6d1;
-    border-radius: 6px;
-    width: 100%;
-    box-sizing: border-box;
-    margin-bottom: 15px;
-    box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.05);
-}
-
-#searchInput:focus {
-    outline: none;
-    border-color: #007bff;
-    box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.25);
+    margin-bottom: 20px;
 }
 
 .button-group {
+    margin-bottom: 20px;
     display: flex;
     gap: 10px;
-    margin-bottom: 20px;
-    flex-wrap: wrap;
 }
 
 button {
-    padding: 10px 18px;
-    border: none;
-    border-radius: 5px;
     cursor: pointer;
+    padding: 8px 15px;
+    border-radius: 4px;
+    border: none;
     font-weight: bold;
-    font-size: 14px;
-    transition: all 0.2s ease;
-    display: flex;
-    align-items: center;
-    justify-content: center;
 }
 
 #addButton {
@@ -80,149 +27,100 @@ button {
     color: white;
 }
 
-#addButton:hover {
-    background-color: #218838;
-    transform: translateY(-1px);
-}
-
 #refreshButton {
     background-color: #007bff;
     color: white;
 }
 
-#refreshButton:hover {
-    background-color: #0069d9;
-}
-
 #exportButton {
     background-color: #6c757d;
     color: white;
-    flex-grow: 1;
 }
-
-#exportButton:hover {
-    background-color: #5a6268;
-}
-
-#updateContainer {
-    margin-bottom: 15px;
-    font-size: 13px;
-    color: #666;
-    font-style: italic;
-}
-
-/* ------------------------------------- */
-/* TABELA DE DADOS                       */
-/* ------------------------------------- */
 
 .table-container {
     overflow-x: auto;
-    /* Garante que a tabela não quebre em telas pequenas */
     background: white;
+    padding: 10px;
     border-radius: 8px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
 }
 
-#planilha {
+table {
     width: 100%;
     border-collapse: collapse;
-    min-width: 1000px;
-    /* Evita que as colunas fiquem muito apertadas */
 }
 
-#planilha th {
-    background-color: #007bff;
-    color: black;
-    font-weight: 600;
-    text-align: center;
-    padding: 14px 10px;
-    text-transform: uppercase;
-    font-size: 13px;
-    letter-spacing: 0.5px;
-    position: sticky;
-    top: 0;
-}
-
-#planilha td {
+th,
+td {
+    border: 1px solid #ddd;
     padding: 10px;
-    border-bottom: 1px solid #eee;
-    text-align: center;
-    font-size: 14px;
-    color: #444;
+    text-align: left;
 }
 
-tr:nth-child(even) {
-    background-color: #fcfcfc;
+th {
+    background-color: #f8f9fa;
 }
 
-tr:hover {
-    background-color: #f1f7ff;
-}
-
-/* ------------------------------------- */
-/* MODO DE EDIÇÃO (INPUTS DENTRO DA TD)  */
-/* ------------------------------------- */
-
-/* Quando clicamos em editar, os inputs devem preencher a célula */
-tr.editing td input,
-tr.editing td select {
-    width: 100%;
-    padding: 6px;
-    border: 1px solid #ffc107;
-    border-radius: 4px;
-    font-size: 13px;
-    box-sizing: border-box;
-    /* Importante para não vazar da célula */
-    background-color: #fff;
-}
-
-tr.editing {
-    background-color: #fffdf5 !important;
-}
-
-/* Botões de Ação na Tabela */
 .btn-edit {
-    background-color: #ffc107;
-    color: #000;
-    margin-right: 4px;
-}
-
-.btn-edit:hover {
-    background-color: #e0a800;
+    background: #ffc107;
+    margin-right: 5px;
 }
 
 .btn-delete {
-    background-color: #dc3545;
+    background: #dc3545;
     color: white;
 }
 
-.btn-delete:hover {
-    background-color: #c82333;
+.btn-note {
+    background: #17a2b8;
+    color: white;
+    margin-right: 5px;
+    font-size: 1.1em;
 }
 
-.btn-save {
-    background-color: #28a745 !important;
-    color: white !important;
+/* --- ESTILO DO MODAL DE NOTAS --- */
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(3px);
 }
 
-.btn-save:hover {
-    background-color: #218838 !important;
+.modal-content {
+    background-color: white;
+    margin: 5% auto;
+    padding: 25px;
+    width: 50%;
+    border-radius: 12px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
 }
 
-/* ------------------------------------- */
-/* UTILITÁRIOS                           */
-/* ------------------------------------- */
-
-.cinza-texto {
-    color: #888;
+.modal-header {
+    border-bottom: 1px solid #eee;
+    margin-bottom: 15px;
+    padding-bottom: 10px;
 }
 
-u {
-    color: crimson;
-    text-decoration: none;
-    font-weight: bold;
+#notaTexto {
+    width: 100%;
+    height: 300px;
+    margin: 10px 0;
+    padding: 12px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    font-family: monospace;
+    resize: vertical;
+    box-sizing: border-box;
 }
 
-/* ------------------------------------- */
-/* DATA                         */
-/* ------------------------------------- */
+.modal-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 15px;
+}

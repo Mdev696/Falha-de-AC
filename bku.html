@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ALARME INFRA/AC - Gerenciamento Supabase</title>
+    <title>SISTEMA DE ALARMES - SUPABASE</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <link rel="stylesheet" href="style.css">
@@ -14,28 +14,19 @@
 
     <div id="areacabecalho">
         <div id="arealogo">
-            <h1><a href="#" style="color:blue; text-decoration:none;">FALHA</a><span class="cinza"> DE INFRA</span></h1>
+            <h1><a href="#" style="color:blue; text-decoration:none;">FALHA</a><span style="color: #666;"> DE
+                    INFRA</span></h1>
         </div>
     </div>
 
-    <input type="text" id="searchInput" placeholder="Pesquisar por UF ou Site (Ex: RJ, ARR)..."
-        style="width: 100%; padding: 10px; margin-bottom: 20px;">
+    <input type="text" id="searchInput" placeholder="Pesquisar site, município ou alarme..."
+        style="width: 100%; padding: 10px; margin-bottom: 20px; border: 1px solid #ccc; border-radius: 4px;">
 
     <div class="button-group">
         <button id="addButton">➕ ADICIONAR NOVO REGISTRO</button>
         <button id="refreshButton">🔄 ATUALIZAR LISTA</button>
         <button id="exportButton">⬇️ EXPORTAR PARA EXCEL</button>
     </div>
-
-    <div id="updateContainer" style="margin-bottom: 10px;">
-        <span id="lastUpdateDisplay" style="font-size: 12px; color: #666;"></span>
-    </div>
-
-    <datalist id="listaMunicipios">
-        <option value="AFONSO CLAUDIO">
-        <option value="RIO DE JANEIRO">
-        <option value="VITORIA">
-    </datalist>
 
     <div class="table-container">
         <table id="planilha">
@@ -52,7 +43,7 @@
                     <th>Alarme</th>
                     <th>Criação</th>
                     <th>Apresentação</th>
-                    <th style="min-width: 120px;">Ações</th>
+                    <th style="min-width: 110px;">Ações</th>
                 </tr>
             </thead>
             <tbody id="tableBody"></tbody>
@@ -62,9 +53,7 @@
     <script>
         // --- CONFIGURAÇÃO SUPABASE ---
         const SUPABASE_URL = 'https://xfxuvhonklytrvcovghr.supabase.co';
-        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhmeHV2aG9ua2x5dHJ2Y292Z2hyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjY0MjM0MDIsImV4cCI6MjA4MTk5OTQwMn0.X-0Y0fqxGWD-L4xorDQk99i3EaGYGiy8yuaoDkBPhY0'; // Mantenha sua chave aqui
-
-        // Correção na inicialização do cliente
+        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhmeHV2aG9ua2x5dHJ2Y292Z2hyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjY0MjM0MDIsImV4cCI6MjA4MTk5OTQwMn0.X-0Y0fqxGWD-L4xorDQk99i3EaGYGiy8yuaoDkBPhY0';
         const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
         // --- CARREGAR DADOS ---
@@ -75,8 +64,7 @@
                 .order('criacao', { ascending: false });
 
             if (error) {
-                console.error('Erro ao buscar dados:', error);
-                alert("Erro ao carregar dados: " + error.message);
+                alert("Erro ao buscar dados: " + error.message);
             } else {
                 renderizarTabela(data);
             }
@@ -88,6 +76,13 @@
 
             dados.forEach((item) => {
                 const tr = document.createElement("tr");
+
+                // Aplicar classe de status para cor lateral no CSS
+                if (item.statusTa) {
+                    const statusSlug = item.statusTa.toLowerCase().replace(" ", "-");
+                    tr.classList.add('status-' + statusSlug);
+                }
+
                 tr.innerHTML = `
                     <td>${item.uf}</td>
                     <td>${item.municipio || ''}</td>
@@ -101,13 +96,12 @@
                     <td>${formatarData(item.criacao)}</td>
                     <td>${formatarData(item.apresentacao)}</td>
                     <td>
-                        <button class="btn-edit" onclick="alternarEdicao(this, '${item.id}')">✏️ Editar</button>
-                        <button class="btn-delete" onclick="excluirRegistro('${item.id}')">🗑️ Excluir</button>
+                        <button class="btn-edit" onclick="alternarEdicao(this, '${item.id}')">✏️</button>
+                        <button class="btn-delete" onclick="excluirRegistro('${item.id}')">🗑️</button>
                     </td>
                 `;
                 tableBody.appendChild(tr);
             });
-            document.getElementById('lastUpdateDisplay').textContent = "Atualizado em: " + new Date().toLocaleTimeString();
         }
 
         // --- ADICIONAR ---
@@ -116,30 +110,16 @@
             const novoItem = {
                 uf: "RJ",
                 municipio: "NOVO REGISTRO",
-                taOrigem: "",
-                taSequencia: "",
                 statusTa: "Ativo",
-                topology: "Concentrador",
-                site: "",
-                grupo: "INFRA_CAMPO_TRIAGEM",
-                alarme: "FALHA DE AC",
+                grupo: "INFRA_CAMPO",
                 criacao: agora,
                 apresentacao: agora
             };
 
             const { error } = await supabaseClient.from('alarmes').insert([novoItem]);
-            if (error) alert("Erro ao salvar: " + error.message);
+            if (error) alert("Erro: " + error.message);
             else carregarDados();
         };
-
-        // --- EXCLUIR ---
-        async function excluirRegistro(id) {
-            if (confirm("Deseja realmente excluir permanentemente?")) {
-                const { error } = await supabaseClient.from('alarmes').delete().eq('id', id);
-                if (error) alert("Erro ao excluir!");
-                else carregarDados();
-            }
-        }
 
         // --- EDITAR / SALVAR ---
         async function alternarEdicao(botao, id) {
@@ -147,69 +127,77 @@
 
             if (!tr.classList.contains('editing')) {
                 tr.classList.add('editing');
-                botao.textContent = "💾 Salvar";
+                botao.textContent = "💾";
                 const celulas = tr.querySelectorAll('td');
                 const v = Array.from(celulas).map(c => c.innerText);
 
-                // Transformando células em inputs
-                celulas[0].innerHTML = `<select><option value="RJ" ${v[0] == 'RJ' ? 'selected' : ''}>RJ</option><option value="ES" ${v[0] == 'ES' ? 'selected' : ''}>ES</option></select>`;
-                celulas[1].innerHTML = `<input type="text" list="listaMunicipios" value="${v[1]}">`;
-                celulas[2].innerHTML = `<input type="text" value="${v[2]}">`;
-                celulas[3].innerHTML = `<input type="text" value="${v[3]}">`;
-                celulas[4].innerHTML = `<select><option value="Ativo" ${v[4] == 'Ativo' ? 'selected' : ''}>Ativo</option><option value="Pré Baixa" ${v[4] == 'Pré Baixa' ? 'selected' : ''}>Pré Baixa</option><option value="Fechado" ${v[4] == 'Fechado' ? 'selected' : ''}>Fechado</option></select>`;
-                // Topology (Célula 5) - mantendo apenas texto ou editável? Vou deixar editável:
-                celulas[5].innerHTML = `<input type="text" value="${v[5]}">`;
-                celulas[6].innerHTML = `<input type="text" value="${v[6]}" oninput="this.value=this.value.toUpperCase()">`;
-                celulas[8].innerHTML = `<input type="text" value="${v[8]}">`;
-            } else {
-                const inputs = tr.querySelectorAll('input, select');
-
-                // Mapeamento correto dos inputs para as colunas do banco
-                const dadosAtualizados = {
-                    uf: inputs[0].value,
-                    municipio: inputs[1].value,
-                    taOrigem: inputs[2].value,
-                    taSequencia: inputs[3].value,
-                    statusTa: inputs[4].value,
-                    topology: inputs[5].value,
-                    site: inputs[6].value.toUpperCase(),
-                    alarme: inputs[7].value
+                const converterParaInput = (t) => {
+                    if (!t) return "";
+                    const [d, h] = t.split(' ');
+                    const [dia, mes, ano] = d.split('/');
+                    return `${ano}-${mes}-${dia}T${h}`;
                 };
 
-                const { error } = await supabaseClient.from('alarmes').update(dadosAtualizados).eq('id', id);
+                celulas[0].innerHTML = `<select><option value="RJ" ${v[0] == 'RJ' ? 'selected' : ''}>RJ</option><option value="ES" ${v[0] == 'ES' ? 'selected' : ''}>ES</option></select>`;
+                celulas[1].innerHTML = `<input type="text" value="${v[1]}">`;
+                celulas[2].innerHTML = `<input type="text" value="${v[2]}">`;
+                celulas[3].innerHTML = `<input type="text" value="${v[3]}">`;
+                celulas[4].innerHTML = `<select>
+                    <option value="Ativo" ${v[4] == 'Ativo' ? 'selected' : ''}>Ativo</option>
+                    <option value="Pré Baixa" ${v[4] == 'Pré Baixa' ? 'selected' : ''}>Pré Baixa</option>
+                    <option value="Fechado" ${v[4] == 'Fechado' ? 'selected' : ''}>Fechado</option>
+                </select>`;
+                celulas[5].innerHTML = `<input type="text" value="${v[5]}">`;
+                celulas[6].innerHTML = `<input type="text" value="${v[6]}" oninput="this.value=this.value.toUpperCase()">`;
+                celulas[7].innerHTML = `<input type="text" value="${v[7]}">`; // Grupo
+                celulas[8].innerHTML = `<input type="text" value="${v[8]}">`; // Alarme
+                celulas[9].innerHTML = `<input type="datetime-local" value="${converterParaInput(v[9])}">`;
+                celulas[10].innerHTML = `<input type="datetime-local" value="${converterParaInput(v[10])}">`;
+            } else {
+                const inps = tr.querySelectorAll('input, select');
+                const dados = {
+                    uf: inps[0].value, municipio: inps[1].value, taOrigem: inps[2].value,
+                    taSequencia: inps[3].value, statusTa: inps[4].value, topology: inps[5].value,
+                    site: inps[6].value.toUpperCase(), grupo: inps[7].value, alarme: inps[8].value,
+                    criacao: inps[9].value ? new Date(inps[9].value).toISOString() : null,
+                    apresentacao: inps[10].value ? new Date(inps[10].value).toISOString() : null
+                };
 
-                if (error) {
-                    alert("Erro ao atualizar: " + error.message);
-                } else {
-                    tr.classList.remove('editing');
-                    botao.textContent = "✏️ Editar";
-                    carregarDados();
-                }
+                const { error } = await supabaseClient.from('alarmes').update(dados).eq('id', id);
+                if (error) alert(error.message);
+                else carregarDados();
             }
         }
 
-        // --- PESQUISA ---
-        document.getElementById("searchInput").onkeyup = function () {
-            const filtro = this.value.toLowerCase();
-            document.querySelectorAll("#tableBody tr").forEach(linha => {
-                linha.style.display = linha.textContent.toLowerCase().includes(filtro) ? "" : "none";
-            });
-        };
-
-        // --- EXPORTAÇÃO ---
-        document.getElementById("exportButton").onclick = function () {
-            const wb = XLSX.utils.table_to_book(document.getElementById('planilha'), { sheet: "Alarmes" });
-            XLSX.writeFile(wb, "Relatorio_Alarme_Supabase.xlsx");
-        };
+        // --- EXCLUIR ---
+        async function excluirRegistro(id) {
+            if (confirm("Excluir este registro permanentemente?")) {
+                const { error } = await supabaseClient.from('alarmes').delete().eq('id', id);
+                if (error) alert("Erro ao excluir");
+                else carregarDados();
+            }
+        }
 
         // --- AUXILIARES ---
-        function formatarData(dataISO) {
-            if (!dataISO) return "";
-            const d = new Date(dataISO);
+        function formatarData(iso) {
+            if (!iso) return "";
+            const d = new Date(iso);
             return d.toLocaleDateString('pt-BR') + " " + d.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
         }
 
         document.getElementById("refreshButton").onclick = () => carregarDados();
+
+        document.getElementById("searchInput").onkeyup = function () {
+            const f = this.value.toLowerCase();
+            document.querySelectorAll("#tableBody tr").forEach(row => {
+                row.style.display = row.innerText.toLowerCase().includes(f) ? "" : "none";
+            });
+        };
+
+        document.getElementById("exportButton").onclick = () => {
+            const wb = XLSX.utils.table_to_book(document.getElementById('planilha'));
+            XLSX.writeFile(wb, "Relatorio_Alarmes.xlsx");
+        };
 
         window.onload = carregarDados;
     </script>
